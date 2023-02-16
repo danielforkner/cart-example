@@ -1,5 +1,4 @@
 const client = require('./client');
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const JWT = process.env.JWT;
 
