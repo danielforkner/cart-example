@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import Home from './Home';
 import Login from './Login';
+import Cart from './Cart';
 import { Link, Routes, Route } from 'react-router-dom';
 
 const App = () => {
   const [auth, setAuth] = useState({});
   const [cart, setCart] = useState({});
+  const [products, setProducts] = useState([]);
+
+  // console.log('PRODUCTS: ', products);
+  console.log('CART: ', cart);
+
   const attemptLogin = () => {
     const token = window.localStorage.getItem('token');
     if (token) {
@@ -16,12 +22,24 @@ const App = () => {
         },
       })
         .then((response) => response.json())
-        .then((user) => setAuth(user));
+        .then((user) => {
+          setAuth(user);
+          fetch(`/api/carts/${user.id}`)
+            .then((response) => response.json())
+            .then((cart) => setCart(cart));
+        });
     }
+  };
+
+  const fetchProducts = async () => {
+    const response = await fetch('/api/products');
+    const products = await response.json();
+    setProducts(products);
   };
 
   useEffect(() => {
     attemptLogin();
+    fetchProducts();
   }, []);
 
   const logout = () => {
@@ -56,7 +74,7 @@ const App = () => {
           <>
             <Link to="/">Home</Link>
             <button onClick={logout}>Logout {auth.username}</button>
-            <p>Cart ({cart.products?.length})</p>
+            <Link to="/cart">Cart ({cart.products?.length})</Link>
           </>
         ) : (
           <>
@@ -67,7 +85,16 @@ const App = () => {
       <Routes>
         {auth.id ? (
           <>
-            <Route path="/" element={<Home auth={auth} />} />
+            <Route
+              path="/"
+              element={
+                <Home auth={auth} products={products} setCart={setCart} />
+              }
+            />
+            <Route
+              path="/cart"
+              element={<Cart cart={cart} setCart={setCart} />}
+            />
           </>
         ) : (
           <>
