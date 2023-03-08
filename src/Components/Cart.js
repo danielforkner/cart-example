@@ -18,10 +18,9 @@ const Cart = ({ cart, setCart }) => {
 
   const purchaseCart = async () => {
     const token = window.localStorage.getItem('token');
-    console.log('TOKEN: ', token);
     if (!token) return;
-    const response = await fetch(`/api/carts/purchase`, {
-      method: 'PATCH',
+    const response = await fetch(`/api/carts`, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: token,

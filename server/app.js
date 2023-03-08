@@ -20,6 +20,12 @@ app.get('/', (req, res) =>
 
 app.use('/api/auth', require('./api/auth'));
 
+// app.post('/api/users/register', async (req, res) => {
+//   const user = await createUser(req.body);
+//   const cart = await createCart(user.id);
+//   res.send({user, cart})
+// })
+
 app.get('/api/products', async (req, res) => {
   const products = await getAllProducts();
   res.send(products);
@@ -29,6 +35,13 @@ app.get('/api/carts/:userId', async (req, res) => {
   const { userId } = req.params;
   const cart = await getCartByUserId({ userId });
   res.send(cart);
+});
+
+app.post('/api/carts/', async (req, res) => {
+  const user = await getUserByToken(req.headers.authorization);
+  const cart = await getCartByUserId({ userId: user.id });
+  const newCart = await purchaseCart({ cartId: cart.id, userId: user.id });
+  res.send(newCart);
 });
 
 app.post('/api/carts/:productId', async (req, res) => {
@@ -55,16 +68,6 @@ app.delete('/api/carts/:productId', async (req, res) => {
   await deleteProductFromCart({ cartId: cart.id, productId });
   const updatedCart = await getCartByUserId({ userId: user.id });
   res.send(updatedCart);
-});
-
-app.patch('/api/carts/purchase/', async (req, res) => {
-  const user = await getUserByToken(req.headers.authorization);
-  console.log('USER: ', user);
-  const cart = await getCartByUserId({ userId: user.id });
-  console.log('CART: ', cart);
-  const newCart = await purchaseCart({ cartId: cart.id, userId: user.id });
-  console.log('NewCART: ', newCart);
-  res.send(newCart);
 });
 
 app.use((err, req, res, next) => {
